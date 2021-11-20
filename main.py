@@ -5,7 +5,7 @@ This is the main script used for examples and testing the request calls. A
 Crunchyroll schema/object will be created under the util and schema directories
 
 """
-from crunchyroll_connect.utils.server import CrunchyrollServer, RequestType
+from crunchyroll_connect.utils.server import CrunchyrollServer
 
 creds = {
     'account': 'steven.smith1998@hotmail.com',
@@ -15,9 +15,14 @@ creds = {
 
 if __name__ == "__main__":
     server = CrunchyrollServer()
-    url = server.getUrl(RequestType.LOGIN)
 
-    session = server.start_session()
-    print(session.json()['data']['session_id'])
-    #response = server.login(creds['account'], creds['password'], 'b4f5822ed36ec2757f92385253d1b184')
-    #print(response.text)
+    session = server.start_session().json()
+    session_id = session['data']['session_id']
+
+    response = server.login(creds['account'], creds['password'], session_id).json()
+
+    auth = response['data']['auth']
+    user = response['data']['user']['user_id']
+
+    logout = server.logout(user,session_id)
+    print(logout.json())

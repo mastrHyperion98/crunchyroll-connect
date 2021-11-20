@@ -1,11 +1,7 @@
-from enum import Enum
 import requests
 import uuid
 
-class RequestType(Enum):
-    LOGIN = "login"
-    LOGOUT = "logout"
-    CREATE_SESSION = 'start_session'
+from .types import RequestType
 
 
 class CrunchyrollServer:
@@ -16,16 +12,14 @@ class CrunchyrollServer:
         self.version = 0
         self.english = 'enUS'
 
-
-    def getUrl(self, req):
-       if not isinstance(req, RequestType):
-           return "https://{}".format(self.domain)
-       else:
-           return "https://{}/{}.{}.json".format(self.domain, req.value, self.version)
-
+    def get_url(self, req):
+        if not isinstance(req, RequestType):
+            return "https://{}".format(self.domain)
+        else:
+            return "https://{}/{}.{}.json".format(self.domain, req.value, self.version)
 
     def start_session(self):
-        url = self.getUrl(RequestType.CREATE_SESSION)
+        url = self.get_url(RequestType.CREATE_SESSION)
         params = {
             'access_token': self.token,
             'device_type': self.device_type,
@@ -36,12 +30,21 @@ class CrunchyrollServer:
 
         return response
 
-
     def login(self, account, password, session_id):
-        url = self.getUrl(RequestType.LOGIN)
+        url = self.get_url(RequestType.LOGIN)
         data = {
             'account': account,
             'password': password,
+            'session_id': session_id
+        }
+
+        response = requests.post(url, data)
+        return response
+
+    def logout(self, user, session_id):
+        url = self.get_url(RequestType.LOGOUT)
+        data = {
+            'user': user,
             'session_id': session_id
         }
 
