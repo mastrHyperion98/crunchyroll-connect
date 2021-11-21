@@ -1,12 +1,10 @@
 import requests
-import uuid
 
 from .types import RequestType
 from .user import Config
 
 
 def validate_request(req):
-
     if not isinstance(req, dict):
         return False
 
@@ -69,6 +67,7 @@ class CrunchyrollServer:
         }
 
         response = requests.post(url, data).json()
+        # Note to check for expiration of the session and clear data to prevent re-using the same session maybe.
         if validate_request(response):
             self.__config.store['account'] = account
             self.__config.store['password'] = password
@@ -100,3 +99,18 @@ class CrunchyrollServer:
     def end_session(self):
         self.__config.close_store()
 
+    def fetch_locales(self):
+        url = self.get_url(RequestType.LIST_LOCALES)
+
+        data = {
+            'session_id': self.__config.store['session_id'],
+            'device_type': self.__config.store['device_type'],
+            'device_id': self.__config.store['device_id']
+        }
+        response = requests.get(url, data).json()
+
+        if validate_request(response):
+            self.__config.store['cr_locales'] = response['data']
+            return True
+
+        return False

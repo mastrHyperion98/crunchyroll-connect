@@ -2,6 +2,7 @@ import shelve
 import os
 import uuid
 
+
 class Config:
 
     def __init__(self):
@@ -20,6 +21,7 @@ class Config:
             store['password'] = ""
             store['auth'] = ""
             store['user_id'] = ""
+            store['cr_locales'] = None
 
             self.store = store
 
@@ -32,6 +34,7 @@ class Config:
         self.store['password'] = ""
         self.store['auth'] = ""
         self.store['user_id'] = ""
+        self.store['cr_locales'] = None
         self.store.sync()
 
     def close_store(self):
