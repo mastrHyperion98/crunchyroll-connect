@@ -16,13 +16,8 @@ creds = {
 if __name__ == "__main__":
     server = CrunchyrollServer()
 
-    session = server.start_session().json()
-    session_id = session['data']['session_id']
+    session = server.start_session()
 
-    response = server.login(creds['account'], creds['password'], session_id).json()
-
-    auth = response['data']['auth']
-    user = response['data']['user']['user_id']
-
-    logout = server.logout(user,session_id)
-    print(logout.json())
+    response = server.login(creds['account'], creds['password'])
+    logout = server.logout()
+    server.end_session()
