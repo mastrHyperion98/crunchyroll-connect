@@ -11,3 +11,4 @@ class RequestType(Enum):
     LIST_SERIES = 'list_series'
     INFO = 'info'
     CATEGORIES = 'categories'
+    AUTOCOMPLETE = 'autocomplete'

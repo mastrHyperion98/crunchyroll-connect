@@ -3,6 +3,33 @@ import os
 import uuid
 
 
+class User:
+    # Note the use of var : type is only for debugging and readability. Python is not statically typed so data type can
+    # be changed on a whim through assignment
+    def __init__(self,
+                 user_id: int,
+                 etp_guid: str,
+                 username: str,
+                 email: str,
+                 first_name: str,
+                 last_name: str,
+                 premium: str,
+                 access_type: str,
+                 created: str,
+                 is_publisher: bool = False):
+        self._class = 'user',
+        self.user_id = user_id,
+        self.etp_guid = etp_guid,
+        self.username = username,
+        self.email = email,
+        self.first_name = first_name,
+        self.last_name = last_name,
+        self.premium = premium,
+        self.access_type = access_type,
+        self.created = created,
+        self.is_publisher = is_publisher
+
+
 class Config:
 
     def __init__(self):

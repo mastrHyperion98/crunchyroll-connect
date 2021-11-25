@@ -1,7 +1,8 @@
 import requests
 
-from .types import RequestType
-from .user import Config
+from utils.types import RequestType
+from utils.user import Config
+from utils.collections import Series
 
 
 def validate_request(req):
@@ -104,7 +105,7 @@ class CrunchyrollServer:
 
         data = {
             'session_id': self.__config.store['session_id'],
-            'device_type': self.__config.store['device_type'],
+            'device_type': self.device_type,
             'device_id': self.__config.store['device_id']
         }
         response = requests.get(url, data).json()
@@ -114,3 +115,43 @@ class CrunchyrollServer:
             return True
 
         return False
+
+    def get_series_id(self, query):
+        """
+        Searches for the seriesID of an anime in the Crunchyroll catalogue. If it is present return the ID
+        :param query: the name of the anime
+        :return: the Crunchyroll series ID
+        """
+        url = self.get_url(RequestType.AUTOCOMPLETE)
+
+        data = {
+            'session_id': self.__config.store['session_id'],
+            'device_type': self.device_type,
+            'device_id': self.__config.store['device_id'],
+            'q': query,
+            'media_types': 'anime',
+            'limit': 10 # Artificially limit to 10 results
+        }
+
+        response = requests.get(url, data).json()
+
+        if validate_request(response):
+            search_results = response['data']
+            if len(search_results) < 1:
+                return None
+
+            for anime in response['data']:
+
+                anime_name = anime['name'].lower()
+                series_id = anime['series_id']
+                search_query = query.lower()
+
+                if anime_name == search_query:
+                    return series_id
+
+                else:
+                    continue
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
+
+
