@@ -40,10 +40,10 @@ class Media:
                  series_etp_guid: str,
                  episode_number: str,
                  name: str,
-                 description, str,
+                 description: str,
                  screenshot_image: ImageSet,
-                 bif_uri: str,
-                 uri: str,
+                 bif_url: str,
+                 url: str,
                  clip: bool,
                  available: bool,
                  premium_available:bool,
@@ -64,8 +64,8 @@ class Media:
         self.name = name
         self.description = description
         self.screenshot_image = screenshot_image
-        self.bif_uri = bif_uri
-        self.uri = uri
+        self.bif_url = bif_url
+        self.url = url
         self.clip = clip
         self.available = available
         self.premium_available = premium_available
@@ -107,8 +107,8 @@ class Media:
                                         self.name,
                                         self.description,
                                         self.screenshot_image,
-                                        self.bif_uri,
-                                        self.uri,
+                                        self.bif_url,
+                                        self.url,
                                         self.clip,
                                         self.available,
                                         self.premium_available,

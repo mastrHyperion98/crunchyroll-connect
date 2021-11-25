@@ -3,6 +3,7 @@ import requests
 from .utils.collections import Series, Collection
 from .utils.types import RequestType, Filters, Genres
 from .utils.user import Config, User, datetime
+from .utils.media import Media
 
 # Temporary will be moved elsewhere
 mediaFields = [
@@ -38,6 +39,7 @@ def login_required(function):
             return function(self, *args, **kwargs)
         else:
             raise ValueError('Must be logged in to access to function')
+
     return wrap
 
 
@@ -50,6 +52,7 @@ class CrunchyrollServer:
         self.english = 'enUS'
         self.settings = Config()
         self.settings.init_store()
+        self.session = requests.Session()
 
     def get_url(self, req):
         if not isinstance(req, RequestType):
@@ -69,7 +72,7 @@ class CrunchyrollServer:
             'version': 1.1
         }
 
-        response = requests.get(url, params).json()
+        response = self.session.post(url, params, cookies=self.session.cookies).json()
         if validate_request(response):
             self.settings.store['session_id'] = response['data']['session_id']
             self.settings.store['device_id'] = device_id
@@ -105,7 +108,7 @@ class CrunchyrollServer:
             'session_id': self.settings.store['session_id']
         }
 
-        response = requests.post(url, data).json()
+        response = self.session.post(url, data).json()
         print(response)
         # Note to check for expiration of the session and clear data to prevent re-using the same session maybe.
         if validate_request(response):
@@ -142,17 +145,18 @@ class CrunchyrollServer:
             'session_id': self.settings.store['session_id']
         }
 
-        response = requests.post(url, data)
+        response = self.session.post(url, data)
 
         if validate_request(response.json()):
             self.settings.clear_store()
-
+            self.session.cookies.clear()
             return True
 
         return False
 
     def end_session(self):
         self.settings.close_store()
+        self.session.close()
 
     def fetch_locales(self):
         url = self.get_url(RequestType.LIST_LOCALES)
@@ -162,7 +166,7 @@ class CrunchyrollServer:
             'device_type': self.device_type,
             'device_id': self.settings.store['device_id']
         }
-        response = requests.get(url, data).json()
+        response = self.session.get(url, data).json()
 
         if validate_request(response):
             self.settings.store['cr_locales'] = response['data']
@@ -187,8 +191,8 @@ class CrunchyrollServer:
             'limit': 10  # Artificially limit to 10 results
         }
 
-        response = requests.get(url, data).json()
-
+        response = self.session.get(url, params=data, cookies=self.session.cookies).json()
+        print(response)
         if validate_request(response):
             search_results = response['data']
             if len(search_results) < 1:
@@ -220,7 +224,7 @@ class CrunchyrollServer:
             'series_id': series_id
         }
 
-        response = requests.get(url, data).json()
+        response = self.session.get(url, params=data, cookies=self.session.cookies).json()
 
         if validate_request(response):
             data = response['data']
@@ -243,6 +247,8 @@ class CrunchyrollServer:
                 )
 
                 collections.append(collection)
+
+            return collections
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
@@ -278,7 +284,7 @@ class CrunchyrollServer:
             'filter': tag
         }
 
-        response = requests.get(url, data).json()
+        response = self.session.get(url, params=data, cookies=self.session.cookies).json()
         if validate_request(response):
             series = []
 
@@ -298,7 +304,7 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
-    def get_media(self, collection_id, limit=1000, offset=0):
+    def get_episodes(self, collection_id, limit=1000, offset=0):
         url = self.get_url(RequestType.LIST_MEDIA)
 
         data = {
@@ -311,3 +317,35 @@ class CrunchyrollServer:
             'collection_id': collection_id
         }
 
+        response = self.session.get(url, params=data, cookies=self.session.cookies).json()
+
+        if validate_request(response):
+            media_list = []
+            episode_list = response['data']
+
+            for ep in episode_list:
+                media_list.append(Media(
+                    media_id=ep['media_id'],
+                    etp_guid=ep['etp_guid'],
+                    collection_id=ep['collection_id'],
+                    collection_etp_guid=ep['collection_etp_guid'],
+                    series_id=ep['series_id'],
+                    series_etp_guid=ep['series_etp_guid'],
+                    episode_number=ep['episode_number'],
+                    name=ep['name'],
+                    description=ep['description'],
+                    screenshot_image=ep['screenshot_image'],
+                    bif_url=ep['bif_url'],
+                    url=ep['url'],
+                    clip=ep['clip'],
+                    available=ep['available'],
+                    premium_available=ep['premium_available'],
+                    free_available=ep['free_available'],
+                    availability_notes=ep['availability_notes'],
+                    created=ep['created'],
+                    playhead=ep['playhead']))
+
+            return media_list
+
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
