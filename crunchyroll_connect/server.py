@@ -1,6 +1,6 @@
 import requests
 
-from .utils.types import RequestType
+from .utils.types import RequestType, Filters, Genres
 from .utils.user import Config
 from .utils.collections import Series, Collection
 
@@ -130,7 +130,7 @@ class CrunchyrollServer:
             'device_id': self.__config.store['device_id'],
             'q': query,
             'media_types': 'anime',
-            'limit': 10 # Artificially limit to 10 results
+            'limit': 10  # Artificially limit to 10 results
         }
 
         response = requests.get(url, data).json()
@@ -174,6 +174,8 @@ class CrunchyrollServer:
                 availability_notes=data['availability_notes'],
                 series_id=series_id,
                 collection_id=data['collection_id'],
+                etp_guid = data['etp_guid'],
+                series_etp_guid= data['series_etp_guid'],
                 complete=data['complete'],
                 name=data['name'],
                 description=data['description'],
@@ -187,23 +189,54 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
-    def list_series(self, offset, filter):
+    def list_series(self, limit: int = 10, offset: int = 0, filter_type: Filters = None, filter_tag: str = None):
         """
-
-        :param offset: list_series uses a pagination system and has an offset feature
+        Returns a list of series
+        :param limit: The maximum number of items to return
+        :param filter_tag: The tag, if any to be associated with the filter. Only if filter_type == PREFIX or TAG
+        :param filter_type: The filter type as defined in utils.types.Filters
+        :param offset: offset from the start to return. This enables a pagination system
         :return:
         """
         url = self.get_url(RequestType.LIST_SERIES)
+
+        # If the passed in value is a genre get the string value
+        if isinstance(filter_tag, Genres):
+            filter_tag = filter_tag.value
+
+        if filter_tag is not None and (filter_type == Filters.PREFIX or filter_type == Filters.TAG):
+            tag = filter_type.value + filter_tag
+        elif filter_type is not None:
+            tag = filter_type.value
+        else:
+            tag = None
 
         data = {
             'session_id': self.__config.store['session_id'],
             'device_type': self.device_type,
             'device_id': self.__config.store['device_id'],
             'media_type': 'anime',
-            'limit': 1000,
-            'offset': offset
+            'limit': limit,
+            'offset': offset,
+            'filter': tag
         }
 
-        response = requests.get(url, data)
-        print(len(response.json()['data']))
+        response = requests.get(url, data).json()
+        if validate_request(response):
+            series = []
 
+            for el in response['data']:
+                series.append(Series(
+                    series_id= el['series_id'],
+                    etp_guid= el['etp_guid'],
+                    name= el['name'],
+                    description= el['description'],
+                    url = el['url'],
+                    landscape_image= el['landscape_image'],
+                    portrait_image= el['portrait_image'],
+                ))
+
+            return series
+
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
