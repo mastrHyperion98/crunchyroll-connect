@@ -1,8 +1,8 @@
 import requests
 
-from utils.types import RequestType
-from utils.user import Config
-from utils.collections import Series
+from .utils.types import RequestType
+from .utils.user import Config
+from .utils.collections import Series, Collection
 
 
 def validate_request(req):
@@ -154,4 +154,35 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
+    def get_collection(self, id):
 
+        url = self.get_url(RequestType.LIST_COLLECTION)
+
+        data = {
+            'session_id': self.__config.store['session_id'],
+            'device_type': self.device_type,
+            'device_id': self.__config.store['device_id'],
+            'media_type': 'anime',
+            'series_id': id
+        }
+
+        response = requests.get(url, data).json()
+
+        if validate_request(response):
+            data = response['data'][0]
+            collection = Collection(
+                availability_notes=data['availability_notes'],
+                series_id=id,
+                collection_id=data['collection_id'],
+                complete=data['complete'],
+                name=data['name'],
+                description=data['description'],
+                landscape_image=data['landscape_image'],
+                portrait_image=data['portrait_image'],
+                season=data['season'],
+                created=data['created']
+            )
+
+            return collection
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))

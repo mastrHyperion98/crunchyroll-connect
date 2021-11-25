@@ -13,14 +13,14 @@ class ImageSet:
                  width: str,
                  height: str):
 
-        self.thumb_url = thumb_url,
-        self.small_url = small_url,
-        self.medium_url = medium_url,
-        self.large_url = large_url,
-        self.full_url = full_url,
-        self.wide_url = wide_url,
-        self.widestar_url = widestar_url,
-        self.fwide_url = fwide_url,
-        self.fwidestar_url = fwidestar_url,
-        self.width = width,
+        self.thumb_url = thumb_url
+        self.small_url = small_url
+        self.medium_url = medium_url
+        self.large_url = large_url
+        self.full_url = full_url
+        self.wide_url = wide_url
+        self.widestar_url = widestar_url
+        self.fwide_url = fwide_url
+        self.fwidestar_url = fwidestar_url
+        self.width = width
         self.height = height
