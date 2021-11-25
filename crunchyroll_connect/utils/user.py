@@ -1,6 +1,7 @@
 import shelve
 import os
 import uuid
+from datetime import datetime
 
 
 class User:
@@ -16,18 +17,24 @@ class User:
                  premium: str,
                  access_type: str,
                  created: str,
+                 expires: str,
                  is_publisher: bool = False):
-        self._class = 'user',
-        self.user_id = user_id,
-        self.etp_guid = etp_guid,
-        self.username = username,
-        self.email = email,
-        self.first_name = first_name,
-        self.last_name = last_name,
-        self.premium = premium,
-        self.access_type = access_type,
-        self.created = created,
+
+        self._class = 'user'
+        self.user_id = user_id
+        self.etp_guid = etp_guid
+        self.username = username
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+        self.premium = premium
+        self.access_type = access_type
+        self.created = datetime.strptime(created, "%Y-%m-%dT%H:%M:%S%z")
+        self.expires = datetime.strptime(expires, "%Y-%m-%dT%H:%M:%S%z")
         self.is_publisher = is_publisher
+
+    def set_expiration(self, date):
+        self.expires = date
 
 
 class Config:
@@ -46,6 +53,7 @@ class Config:
             store['device_id'] = uuid.uuid1()
             store['account'] = ""
             store['password'] = ""
+            store['user'] = None
             store['auth'] = ""
             store['user_id'] = ""
             store['cr_locales'] = None
@@ -59,6 +67,7 @@ class Config:
         self.store['session_id'] = ""
         self.store['account'] = ""
         self.store['password'] = ""
+        self.store['user'] = None
         self.store['auth'] = ""
         self.store['user_id'] = ""
         self.store['cr_locales'] = None

@@ -1,8 +1,8 @@
 import requests
 
-from .utils.types import RequestType, Filters, Genres
-from .utils.user import Config
 from .utils.collections import Series, Collection
+from .utils.types import RequestType, Filters, Genres
+from .utils.user import Config, User, datetime
 
 
 def validate_request(req):
@@ -22,7 +22,6 @@ class CrunchyrollServer:
         self.device_type = 'com.crunchyroll.windows.desktop'
         self.version = 0
         self.english = 'enUS'
-        self.is_logged_in = False
         self.__config = Config()
         self.__config.init_store()
 
@@ -54,6 +53,19 @@ class CrunchyrollServer:
         return False
 
     def login(self, account=None, password=None):
+
+        if self.__config.store['user'] is not None:
+            current_datetime = datetime.now().astimezone().replace(microsecond=0)
+            expires = self.__config.store['user'].expires
+
+            if expires <= current_datetime:
+                # If login session expired, login again
+                self.logout()
+
+            else:
+                print('User is already logged in')
+                return True
+
         if account is None:
             account = self.__config.store['account']
 
@@ -68,19 +80,39 @@ class CrunchyrollServer:
         }
 
         response = requests.post(url, data).json()
+        print(response)
         # Note to check for expiration of the session and clear data to prevent re-using the same session maybe.
         if validate_request(response):
+            # Create user object
+            user_data = response['data']['user']
+            user = User(
+                user_id=user_data['user_id'],
+                etp_guid=user_data['etp_guid'],
+                username=user_data['username'],
+                email=user_data['email'],
+                first_name=user_data['first_name'],
+                last_name=user_data['last_name'],
+                premium=user_data['premium'],
+                access_type=user_data['access_type'],
+                created=user_data['created'],
+                expires=response['data']['expires'],
+                is_publisher=user_data['is_publisher']
+            )
+
             self.__config.store['account'] = account
             self.__config.store['password'] = password
             self.__config.store['auth'] = response['data']['auth']
-            self.__config.store['user_id'] = response['data']['user']['user_id']
+            self.__config.store['user'] = user
 
-            self.is_logged_in = True
             return True
 
         return False
 
     def logout(self):
+
+        if self.__config.store['user'] is None:
+            raise ValueError('Illegal Operation: Cannot logout if User is not logged in!')
+
         url = self.get_url(RequestType.LOGOUT)
         data = {
             'user': self.__config.store['user_id'],
@@ -91,7 +123,6 @@ class CrunchyrollServer:
 
         if validate_request(response.json()):
             self.__config.clear_store()
-            self.is_logged_in = False
 
             return True
 
@@ -174,8 +205,8 @@ class CrunchyrollServer:
                 availability_notes=data['availability_notes'],
                 series_id=series_id,
                 collection_id=data['collection_id'],
-                etp_guid = data['etp_guid'],
-                series_etp_guid= data['series_etp_guid'],
+                etp_guid=data['etp_guid'],
+                series_etp_guid=data['series_etp_guid'],
                 complete=data['complete'],
                 name=data['name'],
                 description=data['description'],
@@ -227,13 +258,13 @@ class CrunchyrollServer:
 
             for el in response['data']:
                 series.append(Series(
-                    series_id= el['series_id'],
-                    etp_guid= el['etp_guid'],
-                    name= el['name'],
-                    description= el['description'],
-                    url = el['url'],
-                    landscape_image= el['landscape_image'],
-                    portrait_image= el['portrait_image'],
+                    series_id=el['series_id'],
+                    etp_guid=el['etp_guid'],
+                    name=el['name'],
+                    description=el['description'],
+                    url=el['url'],
+                    landscape_image=el['landscape_image'],
+                    portrait_image=el['portrait_image'],
                 ))
 
             return series
