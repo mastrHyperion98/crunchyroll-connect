@@ -154,7 +154,7 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
-    def get_collection(self, id):
+    def get_collection(self, series_id):
 
         url = self.get_url(RequestType.LIST_COLLECTION)
 
@@ -163,7 +163,7 @@ class CrunchyrollServer:
             'device_type': self.device_type,
             'device_id': self.__config.store['device_id'],
             'media_type': 'anime',
-            'series_id': id
+            'series_id': series_id
         }
 
         response = requests.get(url, data).json()
@@ -172,7 +172,7 @@ class CrunchyrollServer:
             data = response['data'][0]
             collection = Collection(
                 availability_notes=data['availability_notes'],
-                series_id=id,
+                series_id=series_id,
                 collection_id=data['collection_id'],
                 complete=data['complete'],
                 name=data['name'],
@@ -186,3 +186,24 @@ class CrunchyrollServer:
             return collection
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
+
+    def list_series(self, offset, filter):
+        """
+
+        :param offset: list_series uses a pagination system and has an offset feature
+        :return:
+        """
+        url = self.get_url(RequestType.LIST_SERIES)
+
+        data = {
+            'session_id': self.__config.store['session_id'],
+            'device_type': self.device_type,
+            'device_id': self.__config.store['device_id'],
+            'media_type': 'anime',
+            'limit': 1000,
+            'offset': offset
+        }
+
+        response = requests.get(url, data)
+        print(len(response.json()['data']))
+
