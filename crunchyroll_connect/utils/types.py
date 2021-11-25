@@ -50,4 +50,3 @@ class Genres(Enum):
     SPORTS = 'sports'
     SUPERNATURAL = 'supernatural'
     THRILLER = 'thriller'
-

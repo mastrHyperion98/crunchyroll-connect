@@ -5,23 +5,6 @@ from .utils.types import RequestType, Filters, Genres
 from .utils.user import Config, User, datetime
 from .utils.media import Media
 
-# Temporary will be moved elsewhere
-mediaFields = [
-    "most_likely_media",
-    "media",
-    "media.name",
-    "media.description",
-    "media.episode_number",
-    "media.duration",
-    "media.playhead",
-    "media.screenshot_image",
-    "media.media_id",
-    "media.series_id",
-    "media.series_name",
-    "media.collection_id",
-    "media.url",
-]
-
 
 def validate_request(req):
     if not isinstance(req, dict):
@@ -77,9 +60,8 @@ class CrunchyrollServer:
             self.settings.store['session_id'] = response['data']['session_id']
             self.settings.store['device_id'] = device_id
 
-            return True
-
-        return False
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
 
     def login(self, account=None, password=None):
 
@@ -109,7 +91,6 @@ class CrunchyrollServer:
         }
 
         response = self.session.post(url, data).json()
-        print(response)
         # Note to check for expiration of the session and clear data to prevent re-using the same session maybe.
         if validate_request(response):
             # Create user object
@@ -145,14 +126,14 @@ class CrunchyrollServer:
             'session_id': self.settings.store['session_id']
         }
 
-        response = self.session.post(url, data)
+        response = self.session.post(url, data, cookies=self.session.cookies)
 
         if validate_request(response.json()):
             self.settings.clear_store()
             self.session.cookies.clear()
-            return True
 
-        return False
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
 
     def end_session(self):
         self.settings.close_store()
@@ -192,7 +173,6 @@ class CrunchyrollServer:
         }
 
         response = self.session.get(url, params=data, cookies=self.session.cookies).json()
-        print(response)
         if validate_request(response):
             search_results = response['data']
             if len(search_results) < 1:
@@ -349,3 +329,25 @@ class CrunchyrollServer:
 
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
+
+    @login_required
+    def get_stream(self, media_id):
+        url = self.get_url(RequestType.INFO)
+
+        data = {
+            'session_id': self.settings.store['session_id'],
+            'device_type': self.device_type,
+            'device_id': self.settings.store['device_id'],
+            'media_type': 'anime',
+            'media_id': media_id,
+            'fields': 'media.stream_data,media.playhead'
+        }
+
+        response = self.session.get(url, params=data, cookies=self.session.cookies).json()
+
+        if validate_request(response):
+            return response['data']['stream_data']
+
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
+

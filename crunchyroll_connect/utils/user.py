@@ -33,9 +33,6 @@ class User:
         self.expires = datetime.strptime(expires, "%Y-%m-%dT%H:%M:%S%z")
         self.is_publisher = is_publisher
 
-    def set_expiration(self, date):
-        self.expires = date
-
 
 class Config:
 
