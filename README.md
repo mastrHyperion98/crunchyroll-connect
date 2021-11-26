@@ -9,8 +9,10 @@ develop their own Crunchyroll Application alternative with more robust and flexi
 * Filter Crunchyroll catalog by genres, seasons (ex fall 2020), popularity, release dates, prefixes, etc
 * Get a list of all the collections related to a series. (For example, each season of SAO is a different collection) 
 * Easy to use, self managed package that handles the safe storage of data locally used by application. 
-* Fetch and return stream data that can be used by external media players (for example VLC)
+* Fetch and return stream data that can be used by external/custom media players
 
-# Projects using this package
+# Implementation Requirements
+* FFmpeg(ffplayer --> https://matham.github.io/ffpyplayer/player.html) recommended for HLS episodes. 
+* In theory, VLC also supports HLS, but i've had no luck getting it to properly read the stream. 
 
-* AmadeusTV hosted by mastrHyperion98 -- under development
+
