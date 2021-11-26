@@ -1,1 +1,4 @@
-requests
+requests~=2.26.0
+python-vlc
+python-ffmpeg-video-streaming
+ffpyplayer~=4.3.2

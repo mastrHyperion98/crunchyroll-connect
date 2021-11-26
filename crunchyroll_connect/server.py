@@ -44,24 +44,25 @@ class CrunchyrollServer:
             return "https://{}/{}.{}.json".format(self.domain, req.value, self.version)
 
     def start_session(self):
-        url = self.get_url(RequestType.CREATE_SESSION)
+        if self.settings.store['session_id'] == "":
+            url = self.get_url(RequestType.CREATE_SESSION)
 
-        device_id = self.settings.store['device_id']
+            device_id = self.settings.store['device_id']
 
-        params = {
-            'access_token': self.token,
-            'device_type': self.device_type,
-            'device_id': device_id,
-            'version': 1.1
-        }
+            params = {
+                'access_token': self.token,
+                'device_type': self.device_type,
+                'device_id': device_id,
+                'version': 1.1
+            }
 
-        response = self.session.post(url, params, cookies=self.session.cookies).json()
-        if validate_request(response):
-            self.settings.store['session_id'] = response['data']['session_id']
-            self.settings.store['device_id'] = device_id
+            response = self.session.post(url, params, cookies=self.session.cookies).json()
+            if validate_request(response):
+                self.settings.store['session_id'] = response['data']['session_id']
+                self.settings.store['device_id'] = device_id
 
-        else:
-            raise ValueError('Request Failed!\n\n{}'.format(response))
+            else:
+                raise ValueError('Request Failed!\n\n{}'.format(response))
 
     def login(self, account=None, password=None):
 
