@@ -26,6 +26,16 @@ def login_required(function):
     return wrap
 
 
+def session_required(function):
+    def wrap(self, *args, **kwargs):
+        if self.settings.store['session_id'] != "":
+            return function(self, *args, **kwargs)
+        else:
+            raise ValueError('Illegal action: A valid session must be started.')
+
+    return wrap
+
+
 class CrunchyrollServer:
     def __init__(self):
         self.domain = 'api.crunchyroll.com'
@@ -64,6 +74,7 @@ class CrunchyrollServer:
             else:
                 raise ValueError('Request Failed!\n\n{}'.format(response))
 
+    @session_required
     def login(self, account=None, password=None):
 
         if self.settings.store['user'] is not None:
@@ -120,6 +131,7 @@ class CrunchyrollServer:
         return False
 
     @login_required
+    @session_required
     def logout(self):
         url = self.get_url(RequestType.LOGOUT)
         data = {
@@ -140,6 +152,8 @@ class CrunchyrollServer:
         self.settings.close_store()
         self.session.close()
 
+    @login_required
+    @session_required
     def fetch_locales(self):
         url = self.get_url(RequestType.LIST_LOCALES)
 
@@ -156,6 +170,8 @@ class CrunchyrollServer:
 
         return False
 
+    @login_required
+    @session_required
     def get_series_id(self, query):
         """
         Searches for the seriesID of an anime in the Crunchyroll catalogue. If it is present return the ID
@@ -193,6 +209,8 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
+    @login_required
+    @session_required
     def get_collections(self, series_id):
 
         url = self.get_url(RequestType.LIST_COLLECTION)
@@ -233,6 +251,8 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
+    @login_required
+    @session_required
     def filter_series(self, limit: int = 10, offset: int = 0, filter_type: Filters = None, filter_tag: str = None):
         """
         Returns a list of series
@@ -285,6 +305,8 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
+    @login_required
+    @session_required
     def get_episodes(self, collection_id, limit=1000, offset=0):
         url = self.get_url(RequestType.LIST_MEDIA)
 
@@ -332,6 +354,7 @@ class CrunchyrollServer:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
     @login_required
+    @session_required
     def get_stream(self, media_id):
         url = self.get_url(RequestType.INFO)
 
