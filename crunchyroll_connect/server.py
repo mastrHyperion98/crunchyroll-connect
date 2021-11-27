@@ -193,7 +193,9 @@ class CrunchyrollServer:
         if validate_request(response):
             search_results = response['data']
             if len(search_results) < 1:
-                return None
+                return 269071 #Some random value
+
+            print(response)
 
             for anime in response['data']:
 
@@ -201,7 +203,7 @@ class CrunchyrollServer:
                 series_id = anime['series_id']
                 search_query = query.lower()
 
-                if anime_name == search_query:
+                if search_query in anime_name:
                     return series_id
 
                 else:
