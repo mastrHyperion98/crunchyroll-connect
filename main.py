@@ -1,8 +1,7 @@
 """
 Created by: Steven Smith (aka mastr_hyperion98)
 
-This is the main script used for examples and testing the request calls. A
-Crunchyroll schema/object will be created under the util and schema directories
+This is the main script used for examples and testing the request calls. 
 
 """
 import time

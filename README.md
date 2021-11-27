@@ -16,3 +16,9 @@ develop their own Crunchyroll Application alternative with more robust and flexi
 * In theory, VLC also supports HLS, but i've had no luck getting it to properly read the stream. 
 
 
+# Important Reference Works
+
+* https://github.com/CloudMax94/crunchyroll-api/wiki
+* https://github.com/BeeeQueue/yuna
+
+Both of the above repositories were extremely important to help me understand how the crunchyroll api functions. 
