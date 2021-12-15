@@ -26,6 +26,7 @@ def login_required(function):
     return wrap
 
 
+# Evaluate if session is valid
 def session_required(function):
     def wrap(self, *args, **kwargs):
         if self.settings.store['session_id'] != "":
@@ -128,29 +129,19 @@ class CrunchyrollServer:
 
             return True
 
-        return False
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
 
     @login_required
     @session_required
     def logout(self):
-        url = self.get_url(RequestType.LOGOUT)
-        data = {
-            'user': self.settings.store['user_id'],
-            'session_id': self.settings.store['session_id']
-        }
+        self.settings.clear_store()
+        self.session.cookies.clear()
 
-        response = self.session.post(url, data, cookies=self.session.cookies)
-
-        if validate_request(response.json()):
-            self.settings.clear_store()
-            self.session.cookies.clear()
-
-        else:
-            raise ValueError('Request Failed!\n\n{}'.format(response))
-
-    def end_session(self):
+    def close(self):
         self.settings.close_store()
         self.session.close()
+
 
     @login_required
     @session_required
@@ -168,7 +159,8 @@ class CrunchyrollServer:
             self.settings.store['cr_locales'] = response['data']
             return True
 
-        return False
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
 
     @login_required
     @session_required
@@ -193,9 +185,7 @@ class CrunchyrollServer:
         if validate_request(response):
             search_results = response['data']
             if len(search_results) < 1:
-                return 269071 #Some random value
-
-            print(response)
+                return -1  # Some random value
 
             for anime in response['data']:
 
@@ -376,4 +366,3 @@ class CrunchyrollServer:
 
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
-

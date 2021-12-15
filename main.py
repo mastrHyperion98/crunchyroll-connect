@@ -20,15 +20,15 @@ if __name__ == "__main__":
 
     server.start_session()
     response = server.login(creds['account'], creds['password'])
-    steins_gate_id = server.get_series_id('steins;gate')
-    collection = server.get_collections(steins_gate_id)[0]
-    episodes = server.get_episodes(collection.collection_id)
+    steins_gate_id = server.get_series_id('Re:Zero')
 
+    collection = server.get_collections(steins_gate_id)
+    episodes = server.get_episodes(collection[-1].collection_id)
     episode_id = episodes[0].media_id
     stream_data = server.get_stream(episode_id)
-
     url = stream_data['streams'][0]['url']
 
+    """
     player = MediaPlayer(url)
     while 1:
         frame, val = player.get_frame()
@@ -40,6 +40,8 @@ if __name__ == "__main__":
             img, t = frame
             print(val, t, img.get_pixel_format(), img.get_buffer_size())
             time.sleep(val)
+    """
 
-    logout = server.logout()
-    server.end_session()
+    #logout = server.logout()
+    print(url)
+    server.close()
