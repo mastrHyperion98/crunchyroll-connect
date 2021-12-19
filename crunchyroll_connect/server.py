@@ -55,25 +55,34 @@ class CrunchyrollServer:
             return "https://{}/{}.{}.json".format(self.domain, req.value, self.version)
 
     def start_session(self):
+        """
+        If no session is found, create new session
+        """
         if self.settings.store['session_id'] == "":
-            url = self.get_url(RequestType.CREATE_SESSION)
+            self.__create_session()
 
-            device_id = self.settings.store['device_id']
+    def __create_session(self):
+        """
+        Creates and stores a new Crunchyroll Session
+        """
+        url = self.get_url(RequestType.CREATE_SESSION)
 
-            params = {
-                'access_token': self.token,
-                'device_type': self.device_type,
-                'device_id': device_id,
-                'version': 1.1
-            }
+        device_id = self.settings.store['device_id']
 
-            response = self.session.post(url, params, cookies=self.session.cookies).json()
-            if validate_request(response):
-                self.settings.store['session_id'] = response['data']['session_id']
-                self.settings.store['device_id'] = device_id
+        params = {
+            'access_token': self.token,
+            'device_type': self.device_type,
+            'device_id': device_id,
+            'version': 1.1
+        }
 
-            else:
-                raise ValueError('Request Failed!\n\n{}'.format(response))
+        response = self.session.post(url, params, cookies=self.session.cookies).json()
+        if validate_request(response):
+            self.settings.store['session_id'] = response['data']['session_id']
+            self.settings.store['device_id'] = device_id
+
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
 
     @session_required
     def login(self, account=None, password=None):
@@ -83,18 +92,17 @@ class CrunchyrollServer:
             expires = self.settings.store['user'].expires
 
             if expires <= current_datetime:
-                # If login session expired, login again
-                self.logout()
+                # If login session expired, clear store and login again
+                account = self.settings.store['account']
+                password = self.settings.store['password']
+                self.settings.clear_store()
+                # Create a new session, because current session expired
+                self.__create_session()
+                # Recursive call to itself
 
             else:
-                print('User is already logged in')
-                return True
-
-        if account is None:
-            account = self.settings.store['account']
-
-        if password is None:
-            password = self.settings.store['password']
+                account = self.settings.store['account']
+                password = self.settings.store['password']
 
         url = self.get_url(RequestType.LOGIN)
         data = {

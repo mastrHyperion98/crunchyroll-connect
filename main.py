@@ -10,8 +10,8 @@ from crunchyroll_connect.server import CrunchyrollServer
 from ffpyplayer.player import MediaPlayer
 
 creds = {
-    'account': 'placeholder',
-    'password': 'placeholder'
+    'account': 'steven.smith1998@hotmail.com',
+    'password': 'Panther98@123'
 
 }
 
