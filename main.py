@@ -5,11 +5,17 @@ This is the main script used for examples and testing the request calls.
 
 """
 import time
+import json
 
 from crunchyroll_connect.server import CrunchyrollServer
 from ffpyplayer.player import MediaPlayer
 
 if __name__ == "__main__":
+
+    creds = None
+    with open('creds.json') as f:
+        creds = json.load(f)
+
     server = CrunchyrollServer()
 
     server.start_session()
