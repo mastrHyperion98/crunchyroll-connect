@@ -9,12 +9,6 @@ import time
 from crunchyroll_connect.server import CrunchyrollServer
 from ffpyplayer.player import MediaPlayer
 
-creds = {
-    'account': 'steven.smith1998@hotmail.com',
-    'password': 'Panther98@123'
-
-}
-
 if __name__ == "__main__":
     server = CrunchyrollServer()
 
