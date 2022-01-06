@@ -54,14 +54,7 @@ class CrunchyrollServer:
         else:
             return "https://{}/{}.{}.json".format(self.domain, req.value, self.version)
 
-    def start_session(self):
-        """
-        If no session is found, create new session
-        """
-        if self.settings.store['session_id'] == "":
-            self.__create_session()
-
-    def __create_session(self):
+    def create_session(self):
         """
         Creates and stores a new Crunchyroll Session
         """

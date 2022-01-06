@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     server = CrunchyrollServer()
 
-    server.start_session()
+    server.create_session()
     response = server.login(creds['account'], creds['password'])
     steins_gate_id = server.get_series_id('Re:Zero')
 
