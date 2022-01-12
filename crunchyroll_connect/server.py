@@ -3,7 +3,7 @@ import requests
 from .utils.collections import Series, Collection
 from .utils.types import RequestType, Filters, Genres
 from .utils.user import Config, User, datetime
-from .utils.media import Media
+from .utils.media import Media, MediaStream
 
 
 def validate_request(req):
@@ -348,7 +348,7 @@ class CrunchyrollServer:
 
     @login_required
     @session_required
-    def get_stream(self, media_id):
+    def get_media_stream(self, media_id):
         url = self.get_url(RequestType.INFO)
 
         data = {
@@ -363,7 +363,18 @@ class CrunchyrollServer:
         response = self.session.get(url, params=data, cookies=self.session.cookies).json()
 
         if validate_request(response):
-            return response['data']['stream_data']
+            stream_data = response['data']['stream_data']['streams']
+
+            media_streams = {}
+            for streams in stream_data:
+                quality = streams['quality']
+                expires = streams['expires']
+                url = streams['url']
+
+                media_stream = MediaStream(quality, expires, url)
+                media_streams[quality] = media_stream
+
+            return media_streams
 
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))

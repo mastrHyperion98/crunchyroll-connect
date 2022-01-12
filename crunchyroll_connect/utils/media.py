@@ -118,4 +118,24 @@ class Media:
                                         self.playhead)
 
 
+class MediaStream:
+
+    def __init__(self, quality, expires: str, url: str):
+            self.class_type = "MediaStream"
+            self.quality = quality
+            self.expires = expires
+            self.url = url
+
+    def get_stream(self):
+        return self.url
+
+    def __str__(self):
+            return "\nClass Type: {}" \
+                   "\nQuality: {}" \
+                   "\nExpires: {}" \
+                   "\nUrl: {}".format(self.class_type, self.quality, self.expires, self.url)
+
+
+
+
 

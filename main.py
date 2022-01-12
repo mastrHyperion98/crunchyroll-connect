@@ -8,6 +8,8 @@ import time
 import json
 
 from crunchyroll_connect.server import CrunchyrollServer
+from crunchyroll_connect.utils.types import Quality
+from crunchyroll_connect.utils.media import MediaStream
 from ffpyplayer.player import MediaPlayer
 
 if __name__ == "__main__":
@@ -25,8 +27,9 @@ if __name__ == "__main__":
     collection = server.get_collections(steins_gate_id)
     episodes = server.get_episodes(collection[-1].collection_id)
     episode_id = episodes[0].media_id
-    stream_data = server.get_stream(episode_id)
-    url = stream_data['streams'][0]['url']
+    media = server.get_media_stream(episode_id)
+
+    print(media[Quality.ADAPTIVE.value].get_stream())
 
     """
     player = MediaPlayer(url)
@@ -43,5 +46,4 @@ if __name__ == "__main__":
     """
 
     #logout = server.logout()
-    print(url)
     server.close()

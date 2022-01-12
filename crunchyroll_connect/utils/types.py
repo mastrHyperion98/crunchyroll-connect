@@ -50,3 +50,11 @@ class Genres(Enum):
     SPORTS = 'sports'
     SUPERNATURAL = 'supernatural'
     THRILLER = 'thriller'
+
+
+class Quality(Enum):
+    ADAPTIVE = 'adaptive'
+    LOW = 'low'
+    MID = 'mid'
+    HIGH = 'high'
+    ULTRA = 'ultra'
