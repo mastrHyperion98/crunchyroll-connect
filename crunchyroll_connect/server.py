@@ -1,4 +1,5 @@
 import requests
+import m3u8
 
 from .utils.collections import Series, Collection
 from .utils.types import RequestType, Filters, Genres
@@ -24,6 +25,19 @@ def login_required(function):
             raise ValueError('Must be logged in to access to function')
 
     return wrap
+
+
+def res_to_quality(resolution):
+    if resolution == '1280x720':
+        return "high"
+    if resolution == '1920x1080':
+        return "ultra"
+    if resolution == '848x480':
+        return "mid"
+    if resolution == '640x360':
+        return "low"
+    else:
+        return "lowest"
 
 
 # Evaluate if session is valid
@@ -73,6 +87,7 @@ class CrunchyrollServer:
         if validate_request(response):
             self.settings.store['session_id'] = response['data']['session_id']
             self.settings.store['device_id'] = device_id
+
 
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
@@ -142,7 +157,6 @@ class CrunchyrollServer:
     def close(self):
         self.settings.close_store()
         self.session.close()
-
 
     @login_required
     @session_required
@@ -361,18 +375,25 @@ class CrunchyrollServer:
         }
 
         response = self.session.get(url, params=data, cookies=self.session.cookies).json()
-
         if validate_request(response):
             stream_data = response['data']['stream_data']['streams']
+            expires = stream_data[0]['expires']
+            url = stream_data[0]["url"]
 
+            playlist = m3u8.load(url)  # this could also be an absolute filename
+            m3u8_playlist = playlist.data['playlists']
             media_streams = {}
-            for streams in stream_data:
-                quality = streams['quality']
-                expires = streams['expires']
-                url = streams['url']
+            urls = []
+            for i in range(len(m3u8_playlist)):
+                #Don't visit duplicates
+                r = i % 2
+                stream = m3u8_playlist[i]
 
-                media_stream = MediaStream(quality, expires, url)
-                media_streams[quality] = media_stream
+                if (r==0):
+                    quality = res_to_quality(stream['stream_info']['resolution'])
+                    url = stream['uri']
+                    media_stream = MediaStream(quality, expires, url)
+                    media_streams[quality] = media_stream
 
             return media_streams
 

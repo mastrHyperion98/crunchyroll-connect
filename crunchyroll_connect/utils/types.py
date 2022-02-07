@@ -53,7 +53,7 @@ class Genres(Enum):
 
 
 class Quality(Enum):
-    ADAPTIVE = 'adaptive'
+    LOWEST = 'lowest'
     LOW = 'low'
     MID = 'mid'
     HIGH = 'high'
