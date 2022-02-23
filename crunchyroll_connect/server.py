@@ -158,7 +158,6 @@ class CrunchyrollServer:
         self.settings.close_store()
         self.session.close()
 
-    @login_required
     @session_required
     def fetch_locales(self):
         url = self.get_url(RequestType.LIST_LOCALES)
@@ -177,7 +176,6 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
-    @login_required
     @session_required
     def get_series_id(self, query):
         """
@@ -216,7 +214,6 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
-    @login_required
     @session_required
     def get_collections(self, series_id):
 
@@ -258,7 +255,6 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
-    @login_required
     @session_required
     def filter_series(self, limit: int = 10, offset: int = 0, filter_type: Filters = None, filter_tag: str = None):
         """
