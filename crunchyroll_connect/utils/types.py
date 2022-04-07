@@ -12,7 +12,6 @@ class RequestType(Enum):
     INFO = 'info'
     CATEGORIES = 'categories'
     AUTOCOMPLETE = 'autocomplete'
-    SEARCH = 'search'
 
 
 class Filters(Enum):

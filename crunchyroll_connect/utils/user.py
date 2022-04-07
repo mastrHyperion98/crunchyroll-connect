@@ -40,12 +40,12 @@ class Config:
         self.store = None
 
     def init_store(self):
-        if os.path.isfile('user'):
+        if os.path.isfile('user.dat'):
             # File exists
-            self.store = shelve.open('user')
+            self.store = shelve.open('user.dat')
 
         else:
-            store = shelve.open('user')
+            store = shelve.open('user.dat')
             store['session_id'] = ""
             store['device_id'] = uuid.uuid1()
             store['account'] = ""
@@ -61,7 +61,7 @@ class Config:
         if self.store is None:
             self.init_store()
 
-        self.store['session_id'] = ""
+        #self.store['session_id'] = ""
         self.store['account'] = ""
         self.store['password'] = ""
         self.store['user'] = None
@@ -69,6 +69,9 @@ class Config:
         self.store['user_id'] = ""
         self.store['cr_locales'] = None
         self.store.sync()
+
+    def is_logged_in(self):
+        return self.store['account'] != "" and self.store['password'] != ""
 
     def close_store(self):
         self.store.sync()
