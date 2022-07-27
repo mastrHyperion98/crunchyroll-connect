@@ -1,7 +1,7 @@
 import shelve
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 class User:
@@ -30,7 +30,7 @@ class User:
         self.premium = premium
         self.access_type = access_type
         self.created = datetime.strptime(created, "%Y-%m-%dT%H:%M:%S%z")
-        self.expires = datetime.strptime(expires, "%Y-%m-%dT%H:%M:%S%z")
+        self.expires = expires
         self.is_publisher = is_publisher
 
 
@@ -38,18 +38,19 @@ class Config:
 
     def __init__(self):
         self.store = None
-
+        home = os.path.expanduser("~")
+        app_folder = os.path.join(home, 'amadeus_tv')
+        os.makedirs(app_folder, exist_ok=True)
+        self.file_path = os.path.join(app_folder, 'crunchyroll.data')
+        
     def init_store(self):
-        if os.path.isfile('user.dat'):
+        if os.path.isfile(self.file_path):
             # File exists
-            self.store = shelve.open('user.dat')
-
+            self.store = shelve.open(self.file_path)
         else:
-            store = shelve.open('user.dat')
+            store = shelve.open(self.file_path)
             store['session_id'] = ""
             store['device_id'] = uuid.uuid1()
-            store['account'] = ""
-            store['password'] = ""
             store['user'] = None
             store['auth'] = ""
             store['user_id'] = ""

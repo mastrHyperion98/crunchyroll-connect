@@ -41,7 +41,6 @@ class Series:
                                                self.landscape_image,
                                                self.portrait_image)
 
-
 class Collection:
 
     def __init__(self,

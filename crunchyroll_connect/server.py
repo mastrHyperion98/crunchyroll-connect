@@ -3,7 +3,7 @@ import m3u8
 
 from .utils.collections import Series, Collection
 from .utils.types import RequestType, Filters, Genres
-from .utils.user import Config, User, datetime
+from .utils.user import Config, User, datetime, timedelta
 from .utils.media import Media, MediaStream
 
 
@@ -19,7 +19,7 @@ def validate_request(req):
 
 def login_required(function):
     def wrap(self, *args, **kwargs):
-        if self.settings.store['user'] is not None:
+        if len(self.settings.store['auth']) > 0:
             return function(self, *args, **kwargs)
         else:
             raise ValueError('Must be logged in to access to function')
@@ -72,6 +72,7 @@ class CrunchyrollServer:
         """
         Creates and stores a new Crunchyroll Session
         """
+        
         url = self.get_url(RequestType.CREATE_SESSION)
 
         device_id = self.settings.store['device_id']
@@ -92,26 +93,19 @@ class CrunchyrollServer:
         else:
             raise ValueError('Request Failed!\n\n{}'.format(response))
 
-    @session_required
     def login(self, account=None, password=None):
-
         if self.settings.store['user'] is not None:
-            current_datetime = datetime.now().astimezone().replace(microsecond=0)
+            current_datetime = datetime.now()
             expires = self.settings.store['user'].expires
 
-            if expires <= current_datetime:
-                # If login session expired, clear store and login again
-                account = self.settings.store['account']
-                password = self.settings.store['password']
-                self.settings.clear_store()
-                # Create a new session, because current session expired
-                self.__create_session()
-                # Recursive call to itself
+            if current_datetime <= expires:
+                return True
 
             else:
-                account = self.settings.store['account']
-                password = self.settings.store['password']
+                print("expired")
+                self.settings.clear_store()
 
+        self.create_session()
         url = self.get_url(RequestType.LOGIN)
         data = {
             'account': account,
@@ -134,12 +128,10 @@ class CrunchyrollServer:
                 premium=user_data['premium'],
                 access_type=user_data['access_type'],
                 created=user_data['created'],
-                expires=response['data']['expires'],
+                expires=datetime.now() + timedelta(hours=12),
                 is_publisher=user_data['is_publisher']
             )
 
-            self.settings.store['account'] = account
-            self.settings.store['password'] = password
             self.settings.store['auth'] = response['data']['auth']
             self.settings.store['user'] = user
 
@@ -151,8 +143,26 @@ class CrunchyrollServer:
     @login_required
     @session_required
     def logout(self):
-        self.settings.clear_store()
-        self.session.cookies.clear()
+        url = self.get_url(RequestType.LOGOUT)
+
+        device_id = self.settings.store['device_id']
+
+        params = {
+            'access_token': self.token,
+            'device_type': self.device_type,
+            'device_id': device_id,
+            'version': 1.1,
+            'auth': self.settings.store['auth']
+        }
+
+        response = self.session.post(url, params, cookies=self.session.cookies).json()
+        if validate_request(response):
+            self.settings.clear_store()
+            self.session.cookies.clear()
+
+            print("logged out")
+        else:
+            raise ValueError('Request Failed!\n\n{}'.format(response))
 
     def close(self):
         self.settings.close_store()
