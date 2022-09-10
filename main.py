@@ -20,8 +20,8 @@ if __name__ == "__main__":
 
     server = CrunchyrollServer()
 
-    server.create_session()
-    response = server.login(creds['account'], creds['password'])
+    server.start(creds['account'], creds['password'])
+
     steins_gate_id = server.get_series_id('Re:Zero')
 
     collection = server.get_collections(steins_gate_id)
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     episode_id = episodes[0].media_id
     media = server.get_media_stream(episode_id)
 
-    print(media[Quality.ADAPTIVE.value].get_stream())
+    print(media[Quality.ULTRA.value].get_stream())
 
     """
     player = MediaPlayer(url)
@@ -45,5 +45,5 @@ if __name__ == "__main__":
             time.sleep(val)
     """
 
-    #logout = server.logout()
+    logout = server.logout()
     server.close()

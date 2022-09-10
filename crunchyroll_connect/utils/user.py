@@ -1,7 +1,4 @@
-import shelve
-import os
-import uuid
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 class User:
@@ -17,7 +14,7 @@ class User:
                  premium: str,
                  access_type: str,
                  created: str,
-                 expires: str,
+                 expires: datetime,
                  is_publisher: bool = False):
 
         self._class = 'user'
@@ -33,47 +30,26 @@ class User:
         self.expires = expires
         self.is_publisher = is_publisher
 
-
-class Config:
-
-    def __init__(self):
-        self.store = None
-        home = os.path.expanduser("~")
-        app_folder = os.path.join(home, 'amadeus_tv')
-        os.makedirs(app_folder, exist_ok=True)
-        self.file_path = os.path.join(app_folder, 'crunchyroll.data')
-        
-    def init_store(self):
-        if os.path.isfile(self.file_path):
-            # File exists
-            self.store = shelve.open(self.file_path)
+    def is_expired(self):
+        current_datetime = datetime.now()
+        if current_datetime <= self.expires:
+            return True
         else:
-            store = shelve.open(self.file_path)
-            store['session_id'] = ""
-            store['device_id'] = uuid.uuid1()
-            store['user'] = None
-            store['auth'] = ""
-            store['user_id'] = ""
-            store['cr_locales'] = None
+            return False
 
-            self.store = store
+    def toJSON(self):
 
-    def clear_store(self):
-        if self.store is None:
-            self.init_store()
-
-        #self.store['session_id'] = ""
-        self.store['account'] = ""
-        self.store['password'] = ""
-        self.store['user'] = None
-        self.store['auth'] = ""
-        self.store['user_id'] = ""
-        self.store['cr_locales'] = None
-        self.store.sync()
-
-    def is_logged_in(self):
-        return self.store['account'] != "" and self.store['password'] != ""
-
-    def close_store(self):
-        self.store.sync()
-        self.store.close()
+        return {
+            "class": self._class,
+            "user_id": self.user_id,
+            "etp_guid": self.etp_guid,
+            "username": self.username,
+            "email": self.email,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "premium": self.premium,
+            "access_type": self.access_type,
+            "created": self.created,
+            "expires": self.expires,
+            "is_publisher": self.is_publisher
+        }
