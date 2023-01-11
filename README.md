@@ -3,6 +3,8 @@
 Crunchyroll-connect is a python library used to connect, communicate and fetch streaming data from api.crunchyroll.com. This library enables developers to 
 develop their own Crunchyroll Application alternative with more robust and flexible features. 
 
+Note: This repository may stop working at any time as Crunchyroll has rolled out a new API and there is not telling when they may shutdown the old one. Atm their are still some legacy software that crunchyroll manages that still use the old api. For example, the Windows App.
+
 # Features
 
 * Search crunchyroll API by query
